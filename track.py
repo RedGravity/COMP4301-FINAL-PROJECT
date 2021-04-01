@@ -9,7 +9,10 @@ print("type 'v' to generate a video file with people detection, or type 'cam' to
 type = input()
 
 
-if(type == "video"):
+if(type == "v"):
+	print("input the name of the video file you want to run the program on(make sure your video file is in your working directory):")
+
+	file_name = input()
 
 	print("generating new video file with people detection")
 
@@ -17,7 +20,7 @@ if(type == "video"):
 	hog = cv2.HOGDescriptor()
 	hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
-	vid = cv2.VideoCapture('sun.mp4')
+	vid = cv2.VideoCapture(file_name)
 	maxWidth = 400
 	maxHeight = 300
 
