@@ -10,39 +10,44 @@ type = input()
 
 
 if(type == "v"):
-	print("input the name of the video file you want to run the program on(make sure your video file is in your working directory):")
+	print()
+	print("input the name of the video file you want to run the program on (make sure your video file is in your working directory):")
 
 	file_name = input()
 
+	print()
 	print("generating new video file with people detection")
 
-	# Set HOG Descriptor
+	# Create a HOG Descriptor
 	hog = cv2.HOGDescriptor()
+
+	# Make the Supprot Vector Machine able to classify people
 	hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
+	# Create an object to store information from the video file specified at program start
 	vid = cv2.VideoCapture(file_name)
+
+	# Set width and height in pixels of output video file
 	maxWidth = 400
 	maxHeight = 300
 
 	# cv.VideoWriter(filename, apiPreference, fourcc, fps, frameSize[, isColor]	)
 	vid_out = cv2.VideoWriter('trackedVideo.avi', cv2.VideoWriter_fourcc(*'MJPG'), 20, (maxWidth, maxHeight))
 
+	# Runs on each frame of input video file
 	while(True):
-		# Loops runs on each frame of input video
 		r, frame = vid.read()
 		if r == True:
-			# Resize the frame to a max of 350 pixels in frame_width,
-			# Then convert to greyscale to speed up calculations
+			# Resize the frame to maxWidth by maxHeight in pixels,
 			frame = cv2.resize(frame, (maxWidth, maxHeight))
+
+			# Then convert to greyscale to speed up calculations
 			gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
+			# Detect people in the image
+			(rects, weights) = hog.detectMultiScale(gray_frame, winStride=(4, 4), padding=(8, 8), scale=0.8)
 
-			# detect people in the image
-			(rects, weights) = hog.detectMultiScale(gray_frame, winStride=(4, 4), padding=(8, 8), scale=1.05)
-
-			# apply non-maxima suppression to the bounding boxes using a
-			# fairly large overlap threshold to try to maintain overlapping
-			# boxes that are still people
+			# Use Non Maximum Suppression to reduce number of bounding boxes, to just the best fit
 			rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
 			pick = non_max_suppression(rects, probs=None, overlapThresh=0.65)
 
@@ -59,6 +64,7 @@ if(type == "v"):
 
 	vid.release()
 	vid_out.release()
+	print()
 	print("your video with people detection can be found in your working directory and is named trackedVideo.avi")
 
 
