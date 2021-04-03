@@ -4,6 +4,7 @@ import cv2
 from imutils.object_detection import non_max_suppression
 from imutils import paths
 import imutils
+import datetime
 
 print("type 'v' to generate a video file with people detection, or type 'cam' to use people detection on your webcam")
 type = input()
@@ -16,7 +17,7 @@ if(type == "v"):
 	file_name = input()
 
 	print()
-	print("generating new video file with people detection")
+	print("generating new video file with people detection...")
 
 	# Create a HOG Descriptor
 	hog = cv2.HOGDescriptor()
@@ -34,6 +35,9 @@ if(type == "v"):
 	# cv.VideoWriter(filename, apiPreference, fourcc, fps, frameSize[, isColor]	)
 	vid_out = cv2.VideoWriter('trackedVideo.avi', cv2.VideoWriter_fourcc(*'MJPG'), 20, (maxWidth, maxHeight))
 
+	# Record start time of operation
+	start_time = datetime.datetime.now()
+
 	# Runs on each frame of input video file
 	while(True):
 		r, frame = vid.read()
@@ -44,24 +48,26 @@ if(type == "v"):
 			# Then convert to greyscale to speed up calculations
 			gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-			# Detect people in the image
-			(rects, weights) = hog.detectMultiScale(gray_frame, winStride=(4, 4), padding=(8, 8), scale=0.8)
+			# Detect people in the greyscale frame
+			(rects, weights) = hog.detectMultiScale(gray_frame, winStride=(4, 4), padding=(7, 7), scale=1.1)
 
-			# Use Non Maximum Suppression to reduce number of bounding boxes, to just the best fit
+			# Create numpy array of
 			rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
-			pick = non_max_suppression(rects, probs=None, overlapThresh=0.65)
+
+			# Use Non Maximum Suppression to reduce number of bounding boxes over a threshold of 0.6
+			pick = non_max_suppression(rects, probs=None, overlapThresh=0.6)
 
 			# draw the final bounding boxes
-			for (xa, ya, xb, yb) in pick:
-				#cv2.rectangle(frame, (xA, yA), (xB, yB), (0, 255, 0), 2)
-				cv2.rectangle(frame, (xa, ya), (xb, yb), (255, 0, 0), 2)
+			for (x1, y1, x2, y2) in pick:
+				cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
 
 
 			# add frame to output video file
 			vid_out.write(frame)
 		else:
+			print("Amount of time it took to generate your file in seconds: ")
+			print((datetime.datetime.now() - start_time).total_seconds())
 			break
-
 	vid.release()
 	vid_out.release()
 	print()
@@ -74,40 +80,48 @@ elif(type == 'cam'):
 	hog = cv2.HOGDescriptor()
 	hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
-	vid = cv2.VideoCapture(1)
+	vid = cv2.VideoCapture(0)
 	maxWidth = 250
 	maxHeight = 380
 
+	print("Person Detection is running on your webcam")
+
+	# Record start time of operation
+	start_time = datetime.datetime.now()
 
 	while(True):
 		# Loops runs on each frame of input video
 		r, frame = vid.read()
 		if r == True:
-			# Resize the frame to a max of 350 pixels in frame_width,
-			# Then convert to greyscale to speed up calculations
+			# Resize the frame to a max of maxWidth pixels
 			frame = cv2.resize(frame, (maxHeight, maxWidth))
+
+			# Convert to greyscale to speed up calculations
 			gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
 
-			# detect people in the image
-			(rects, weights) = hog.detectMultiScale(gray_frame, winStride=(4, 4), padding=(8, 8), scale=1.05)
+			# Detect people in the greyscale frame
+			(rects, weights) = hog.detectMultiScale(gray_frame, winStride=(4, 4), padding=(7, 7), scale=1.1)
 
-			# apply non-maxima suppression to the bounding boxes using a
-			# fairly large overlap threshold to try to maintain overlapping
-			# boxes that are still people
+			# Create numpy array of
 			rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
-			pick = non_max_suppression(rects, probs=None, overlapThresh=0.65)
+
+			# Use Non Maximum Suppression to reduce number of bounding boxes over a threshold of 0.6
+			pick = non_max_suppression(rects, probs=None, overlapThresh=0.6)
 
 			# draw the final bounding boxes
-			for (xa, ya, xb, yb) in pick:
-				#cv2.rectangle(frame, (xA, yA), (xB, yB), (0, 255, 0), 2)
-				cv2.rectangle(frame, (xa, ya), (xb, yb), (255, 0, 0), 2)
+			for (x1, y1, x2, y2) in pick:
+				cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
 
 			cv2.imshow('output', frame)
-			c = cv2.waitKey(1)
-			if c == 27:
+			k = cv2.waitKey(1)
+			if k == 27:
+				cv2.destroyAllWindows()
 				break
+
 		else:
+			print("Amount of time it took to generate your file in seconds: ")
+			print((datetime.datetime.now() - start_time).total_seconds())
 			break
 
 	vid.release()
