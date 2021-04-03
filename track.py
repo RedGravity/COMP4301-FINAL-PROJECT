@@ -51,13 +51,11 @@ if(type == "v"):
 			# Detect people in the greyscale frame
 			(rects, weights) = hog.detectMultiScale(gray_frame, winStride=(4, 4), padding=(7, 7), scale=1.1)
 
-			# Create numpy array of
-			rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
-
 			# Use Non Maximum Suppression to reduce number of bounding boxes over a threshold of 0.6
+			rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
 			pick = non_max_suppression(rects, probs=None, overlapThresh=0.6)
 
-			# draw the final bounding boxes
+			# draw final bounding boxes
 			for (x1, y1, x2, y2) in pick:
 				cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
 
@@ -99,14 +97,11 @@ elif(type == 'cam'):
 			# Convert to greyscale to speed up calculations
 			gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-
 			# Detect people in the greyscale frame
 			(rects, weights) = hog.detectMultiScale(gray_frame, winStride=(4, 4), padding=(7, 7), scale=1.1)
 
-			# Create numpy array of
-			rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
-
 			# Use Non Maximum Suppression to reduce number of bounding boxes over a threshold of 0.6
+			rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
 			pick = non_max_suppression(rects, probs=None, overlapThresh=0.6)
 
 			# draw the final bounding boxes
@@ -125,8 +120,6 @@ elif(type == 'cam'):
 			break
 
 	vid.release()
-
-
 
 else:
 	print("invalid entry. run the program again and enter a correct string when prompted")
