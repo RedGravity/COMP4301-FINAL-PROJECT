@@ -63,6 +63,7 @@ if(type == "v"):
 			# add frame to output video file
 			vid_out.write(frame)
 		else:
+			print()
 			print("Amount of time it took to generate your file in seconds: ")
 			print((datetime.datetime.now() - start_time).total_seconds())
 			break
@@ -72,17 +73,17 @@ if(type == "v"):
 	print("your video with people detection can be found in your working directory and is named trackedVideo.avi")
 
 
-
 elif(type == 'cam'):
 	# Set HOG Descriptor
 	hog = cv2.HOGDescriptor()
 	hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
-	vid = cv2.VideoCapture(0)
+	vid = cv2.VideoCapture(1)
 	maxWidth = 250
 	maxHeight = 380
 
-	print("Person Detection is running on your webcam")
+	print("Person Detection is running on your webcam...")
+	print("(press Esc to stop)")
 
 	# Record start time of operation
 	start_time = datetime.datetime.now()
@@ -111,15 +112,18 @@ elif(type == 'cam'):
 			cv2.imshow('output', frame)
 			k = cv2.waitKey(1)
 			if k == 27:
+				print()
+				print("Amount of time your webcam was running people detection: ")
+				print((datetime.datetime.now() - start_time).total_seconds())
+				print()
 				cv2.destroyAllWindows()
 				break
 
 		else:
-			print("Amount of time it took to generate your file in seconds: ")
-			print((datetime.datetime.now() - start_time).total_seconds())
 			break
 
 	vid.release()
+
 
 else:
 	print("invalid entry. run the program again and enter a correct string when prompted")
