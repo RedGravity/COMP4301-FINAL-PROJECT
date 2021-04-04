@@ -7,7 +7,7 @@ import imutils
 import datetime
 from pathlib import Path
 
-print("type 'v' to generate a video file with people detection, or type 'cam' to use human detection on your webcam")
+print("type 'v' to generate a video file with human detection, or type 'cam' to use human detection on your webcam")
 type = input()
 
 
