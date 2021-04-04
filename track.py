@@ -5,8 +5,9 @@ from imutils.object_detection import non_max_suppression
 from imutils import paths
 import imutils
 import datetime
+from pathlib import Path
 
-print("type 'v' to generate a video file with people detection, or type 'cam' to use people detection on your webcam")
+print("type 'v' to generate a video file with people detection, or type 'cam' to use human detection on your webcam")
 type = input()
 
 
@@ -16,62 +17,67 @@ if(type == "v"):
 
 	file_name = input()
 
-	print()
-	print("generating new video file with people detection...")
+	file = Path(file_name)
 
-	# Create a HOG Descriptor
-	hog = cv2.HOGDescriptor()
+	if file.is_file():
+		print()
+		print("generating new video file with human detection...")
 
-	# Make the Supprot Vector Machine able to classify people
-	hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
+		# Create a HOG Descriptor
+		hog = cv2.HOGDescriptor()
 
-	# Create an object to store information from the video file specified at program start
-	vid = cv2.VideoCapture(file_name)
+		# Make the Supprot Vector Machine able to classify people
+		hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
-	# Set width and height in pixels of output video file
-	maxWidth = 400
-	maxHeight = 300
+		# Create an object to store information from the video file specified at program start
+		vid = cv2.VideoCapture(file_name)
 
-	# cv.VideoWriter(filename, apiPreference, fourcc, fps, frameSize[, isColor]	)
-	vid_out = cv2.VideoWriter('trackedVideo.avi', cv2.VideoWriter_fourcc(*'MJPG'), 20, (maxWidth, maxHeight))
+		# Set width and height in pixels of output video file
+		maxWidth = 400
+		maxHeight = 300
 
-	# Record start time of operation
-	start_time = datetime.datetime.now()
+		# cv.VideoWriter(filename, apiPreference, fourcc, fps, frameSize[, isColor]	)
+		vid_out = cv2.VideoWriter('trackedVideo.avi', cv2.VideoWriter_fourcc(*'MJPG'), 20, (maxWidth, maxHeight))
 
-	# Runs on each frame of input video file
-	while(True):
-		r, frame = vid.read()
-		if r == True:
-			# Resize the frame to maxWidth by maxHeight in pixels,
-			frame = cv2.resize(frame, (maxWidth, maxHeight))
+		# Record start time of operation
+		start_time = datetime.datetime.now()
 
-			# Then convert to greyscale to speed up calculations
-			gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+		# Runs on each frame of input video file
+		while(True):
+			r, frame = vid.read()
+			if r == True:
+				# Resize the frame to maxWidth by maxHeight in pixels,
+				frame = cv2.resize(frame, (maxWidth, maxHeight))
 
-			# Detect people in the greyscale frame
-			(rects, weights) = hog.detectMultiScale(gray_frame, winStride=(4, 4), padding=(7, 7), scale=1.1)
+				# Then convert to greyscale to speed up calculations
+				gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-			# Use Non Maximum Suppression to reduce number of bounding boxes over a threshold of 0.6
-			rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
-			pick = non_max_suppression(rects, probs=None, overlapThresh=0.6)
+				# Detect people in the greyscale frame
+				(rects, weights) = hog.detectMultiScale(gray_frame, winStride=(4, 4), padding=(7, 7), scale=1.1)
 
-			# draw final bounding boxes
-			for (x1, y1, x2, y2) in pick:
-				cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
+				# Use Non Maximum Suppression to reduce number of bounding boxes over a threshold of 0.6
+				rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
+				pick = non_max_suppression(rects, probs=None, overlapThresh=0.6)
+
+				# draw final bounding boxes
+				for (x1, y1, x2, y2) in pick:
+					cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
 
 
-			# add frame to output video file
-			vid_out.write(frame)
-		else:
-			print()
-			print("Amount of time it took to generate your file in seconds: ")
-			print((datetime.datetime.now() - start_time).total_seconds())
-			break
-	vid.release()
-	vid_out.release()
-	print()
-	print("your video with people detection can be found in your working directory and is named trackedVideo.avi")
+				# add frame to output video file
+				vid_out.write(frame)
+			else:
+				print()
+				print("Amount of time it took to generate your file in seconds: ")
+				print((datetime.datetime.now() - start_time).total_seconds())
+				break
+		vid.release()
+		vid_out.release()
+		print()
+		print("your video with human detection can be found in your working directory and is named trackedVideo.avi")
 
+	else:
+		print("There is no file with that name in this directory.")
 
 elif(type == 'cam'):
 	# Set HOG Descriptor
@@ -82,7 +88,7 @@ elif(type == 'cam'):
 	maxWidth = 250
 	maxHeight = 380
 
-	print("Person Detection is running on your webcam...")
+	print("human Detection is running on your webcam...")
 	print("(press Esc to stop)")
 
 	# Record start time of operation
@@ -113,7 +119,7 @@ elif(type == 'cam'):
 			k = cv2.waitKey(1)
 			if k == 27:
 				print()
-				print("Amount of time your webcam was running people detection: ")
+				print("Amount of time your webcam was running human detection: ")
 				print((datetime.datetime.now() - start_time).total_seconds())
 				print()
 				cv2.destroyAllWindows()
