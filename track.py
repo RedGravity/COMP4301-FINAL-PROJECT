@@ -54,17 +54,16 @@ if(type == "v"):
 
 				# Detect people in the greyscale frame
 				(rects, weights) = hog.detectMultiScale(gray_frame, winStride=(4, 4), padding=(7, 7), scale=1.1)
+				rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
 
 				# Use Non Maximum Suppression to reduce number of bounding boxes over a threshold of 0.6
-				rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
 				pick = non_max_suppression(rects, probs=None, overlapThresh=0.6)
 
-				# draw final bounding boxes
+				# draw final bounding boxes on original color frame
 				for (x1, y1, x2, y2) in pick:
 					cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
 
-
-				# add frame to output video file
+				# add color frame to output video file
 				vid_out.write(frame)
 			else:
 				print()
@@ -84,7 +83,7 @@ elif(type == 'cam'):
 	hog = cv2.HOGDescriptor()
 	hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
-	vid = cv2.VideoCapture(1)
+	vid = cv2.VideoCapture(0)
 	maxWidth = 250
 	maxHeight = 380
 
@@ -106,16 +105,19 @@ elif(type == 'cam'):
 
 			# Detect people in the greyscale frame
 			(rects, weights) = hog.detectMultiScale(gray_frame, winStride=(4, 4), padding=(7, 7), scale=1.1)
+			rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
 
 			# Use Non Maximum Suppression to reduce number of bounding boxes over a threshold of 0.6
-			rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
 			pick = non_max_suppression(rects, probs=None, overlapThresh=0.6)
 
-			# draw the final bounding boxes
+			# draw the final bounding boxes with non_max_suppression on the original frame
 			for (x1, y1, x2, y2) in pick:
 				cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
 
+			# show webcam frame with human detection
 			cv2.imshow('output', frame)
+
+			# close the program if user enters Esc
 			k = cv2.waitKey(1)
 			if k == 27:
 				print()
